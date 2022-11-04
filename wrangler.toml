@@ -5,3 +5,5 @@ compatibility_date = "2022-11-04"
 [vars]
 API_TOKEN = "Your Token Here"
 ZONE_IDENTIFIER = "Your Zone"
+
+ENTRYPOINT = "/YOUR_ENTRYPOINT_HERE"
