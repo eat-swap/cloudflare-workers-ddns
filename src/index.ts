@@ -1,13 +1,5 @@
-export interface Env {
-	// Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
-	// MY_KV_NAMESPACE: KVNamespace;
-	//
-	// Example binding to Durable Object. Learn more at https://developers.cloudflare.com/workers/runtime-apis/durable-objects/
-	// MY_DURABLE_OBJECT: DurableObjectNamespace;
-	//
-	// Example binding to R2. Learn more at https://developers.cloudflare.com/workers/runtime-apis/r2/
-	// MY_BUCKET: R2Bucket;
-}
+import * as cloudflare_api from "./cloudflare-api";
+import {Env} from "./env";
 
 export default {
 	async fetch(
@@ -16,6 +8,19 @@ export default {
 		ctx: ExecutionContext
 	): Promise<Response> {
 		const IP: string = request.headers.get("cf-connecting-ip") || "Unknown";
-		return new Response(IP);
+
+		// Check insecure HTTP
+		if (request.url.startsWith("http://")) {
+			return new Response(`${IP}, please use HTTPS!`, {
+				headers: {
+					"Location": "https" + request.url.substring(4)
+				},
+				status: 308
+			});
+		}
+
+		// Check entry point
+
+		return new Response(IP + "\n" + await cloudflare_api.listDNS(env.ZONE_IDENTIFIER, env.API_TOKEN, "example.claimfinal.cf"));
 	},
 };
