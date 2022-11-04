@@ -1,6 +1,6 @@
 export {}
 
-function parseJSON(str: string): readonly [any, boolean] {
+export function parseJSON(str: string): readonly [any, boolean] {
 	let jsonObj: any;
 	try {
 		jsonObj = JSON.parse(str)
