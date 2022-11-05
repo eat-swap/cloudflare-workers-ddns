@@ -57,7 +57,7 @@ export default {
 			return new Response(`No such zone found for ${name}`, {status: 400});
 		}
 
-		const [existingDns, existingDnsOK] = await cloudflare_api.listDNS(zone_id, token, name);
+		const [existingDns, existingDnsOK] = await cloudflare_api.listDNS(zone_id, token, name, IP.includes(":") ? "AAAA" : "A");
 		if (!existingDnsOK || !existingDns.success) {
 			return new Response(JSON.stringify(existingDns), {status: 500});
 		}

@@ -13,8 +13,10 @@ export async function callApi(method: string, path: string, payload: any, token:
 	return fetch(req);
 }
 
-export async function listDNS(zone_id: string, token: string, name: string = "") {
-	const path = `zones/${zone_id}/dns_records` + (name ? `?name=${name}` : "");
+export async function listDNS(zone_id: string, token: string, name: string = "", type: string = "") {
+	const path = `zones/${zone_id}/dns_records`
+		+ (name ? `?name=${name}` : "")
+		+ (type ? `${name ? "&" : "?"}type=${type}` : "");
 	const resp = await callApi("GET", path, null, token);
 	return utils.parseJSON(await resp.text());
 }
