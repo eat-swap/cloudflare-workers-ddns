@@ -36,19 +36,38 @@ export default {
 			});
 		}
 
-		const name: string = dto["name"];
-		const [existingDns, existingDnsOK] = await cloudflare_api.listDNS(env.ZONE_IDENTIFIER, env.API_TOKEN, name);
+		const name: string = (dto.name.endsWith(".") ? dto.name.slice(0, -1) : dto.name);
+		const domain = name.slice(name.lastIndexOf(".", name.lastIndexOf(".") - 1) + 1);
+
+		let resp: any, ok: boolean;
+		// Find Zone
+		[resp, ok] = await cloudflare_api.listZone(env.API_TOKEN);
+		if (!ok) {
+			return new Response(JSON.stringify(resp), {status: 500});
+		}
+
+		let zone_id: string = "";
+		for (let i = 0; i < resp.result.length; ++i) {
+			if (resp.result[i].name == domain) {
+				zone_id = resp.result[i].id;
+				break;
+			}
+		}
+		if (!zone_id) {
+			return new Response(`No such zone found: ${domain}`, {status: 400});
+		}
+
+		const [existingDns, existingDnsOK] = await cloudflare_api.listDNS(zone_id, env.API_TOKEN, name);
 		if (!existingDnsOK || !existingDns.success) {
 			return new Response(JSON.stringify(existingDns), {status: 500});
 		}
 
-		let resp: any, ok: boolean;
 		switch (existingDns.result.length) {
 			case 0: // to create
-				 [resp, ok] = await createDNS(env.ZONE_IDENTIFIER, env.API_TOKEN, name, IP);
+				 [resp, ok] = await createDNS(zone_id, env.API_TOKEN, name, IP);
 				break;
 			case 1: // to update
-				[resp, ok] = await updateDNS(env.ZONE_IDENTIFIER, env.API_TOKEN, name, IP, existingDns.result[0].id);
+				[resp, ok] = await updateDNS(zone_id, env.API_TOKEN, name, IP, existingDns.result[0].id);
 				break;
 			default:
 				return new Response("more than 1 record found", {status: 409});

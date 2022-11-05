@@ -42,3 +42,8 @@ export async function updateDNS(zone_id: string, token: string, name: string, ad
 	const resp = await callApi("PUT", path, payload, token);
 	return utils.parseJSON(await resp.text());
 }
+
+export async function listZone(token: string) {
+	const resp = await callApi("GET", "zones", null, token);
+	return utils.parseJSON(await resp.text());
+}
