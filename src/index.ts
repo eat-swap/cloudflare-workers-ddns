@@ -38,7 +38,6 @@ export default {
 
 		const name: string = (dto.name.endsWith(".") ? dto.name.slice(0, -1) : dto.name);
 		const token: string = dto.token;
-		const domain = name.slice(name.lastIndexOf(".", name.lastIndexOf(".") - 1) + 1);
 
 		let resp: any, ok: boolean;
 		// Find Zone
@@ -49,13 +48,13 @@ export default {
 
 		let zone_id: string = "";
 		for (let i = 0; i < resp.result.length; ++i) {
-			if (resp.result[i].name == domain) {
+			if (name.includes(resp.result[i].name)) {
 				zone_id = resp.result[i].id;
 				break;
 			}
 		}
 		if (!zone_id) {
-			return new Response(`No such zone found: ${domain}`, {status: 400});
+			return new Response(`No such zone found for ${name}`, {status: 400});
 		}
 
 		const [existingDns, existingDnsOK] = await cloudflare_api.listDNS(zone_id, token, name);
